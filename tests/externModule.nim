@@ -6,8 +6,8 @@ type TestObj1* = object
 
 func newTestObj1*(a, b, c: int, d: string): TestObj1 = TestObj1(a: a, b: b, c: c, d: d)
 
-TestObj1.getter(b, d)
-TestObj1.setter(a)
+TestObj1.getable(b, d)
+TestObj1.setable(a)
 
 
 type TestObj2* {.customAccess.} = object

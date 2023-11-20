@@ -1,7 +1,7 @@
 import std/[macros, strutils]
 
 
-macro getter*(ObjType: untyped, fields: varargs[untyped]): untyped =
+macro getable*(ObjType: untyped, fields: varargs[untyped]): untyped =
   result = newStmtList()
   for field in fields:
     field.expectKind nnkIdent
@@ -9,7 +9,7 @@ macro getter*(ObjType: untyped, fields: varargs[untyped]): untyped =
       func `field`*(self: `ObjType`): typeof(`ObjType`().`field`) =
         self.`field`
 
-macro setter*(ObjType: untyped, fields: varargs[untyped]): untyped =
+macro setable*(ObjType: untyped, fields: varargs[untyped]): untyped =
   result = newStmtList()
   for field in fields:
     field.expectKind nnkIdent
@@ -18,6 +18,9 @@ macro setter*(ObjType: untyped, fields: varargs[untyped]): untyped =
       func `funcName`*(self: var `ObjType`, v: typeof(`ObjType`().`field`)) =
         self.`field` = v
 
+
+func `~=`(a, b: string): bool {.inline.} =
+  cmpIgnoreStyle(a, b) == 0
 
 macro customAccess*(typeDef) =
   typeDef.expectKind nnkTypeDef
@@ -34,21 +37,13 @@ macro customAccess*(typeDef) =
         var i = 0
         while i < len(pragmas):
           let pragma = pragmas[i]
-          block:
-            if pragma.kind == nnkIdent:
-              if cmpIgnoreStyle(pragma.strVal, "getable") == 0:
-                result.add: quote do:
-                  `innerType`.getter(`fieldName`)
-              elif cmpIgnoreStyle(pragma.strVal, "setable") == 0:
-                let funcName = nnkAccQuoted.newTree(fieldName, ident"=")
-                result.add: quote do:
-                  `innerType`.setter(`fieldName`)
-              else: break
-              if fieldName.kind == nnkPostfix:
-                error "setable/getable fields should not be exported", fieldName
-              pragmas.del(i)
-              continue
-          inc i
+          if pragma.kind == nnkIdent and (pragma.strVal ~= "getable" or pragma.strVal ~= "setable"):
+            result.add: quote do:
+              `innerType`.`pragma`(`fieldName`)
+            if fieldName.kind == nnkPostfix:
+              error "setable/getable fields should not be exported", fieldName
+            pragmas.del(i)
+          else: inc i
       defs[i] = field
 
   result.add innerType

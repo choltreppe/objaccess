@@ -2,7 +2,7 @@ This package lets you generate getter and setter procs for object types. For sit
 
 There are two options:
 
-## setter, getter macros
+## setable, getable macros
 
 ```nim
 type Obj* = object
@@ -10,8 +10,8 @@ type Obj* = object
   c: bool
   d: string
 
-Obj.getter(a, b)
-Obj.setter(d)
+Obj.getable(a, b)
+Obj.setable(d)
 ```
 
 ## customAccess pragma
