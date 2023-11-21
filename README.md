@@ -16,6 +16,8 @@ Obj.setable(d)
 
 ## customAccess pragma
 
+**Note**: this doens't work with mutual recursive types.
+
 ```nim
 type Obj* {.customAccess.} = object
   a {.getable.}, b {.getable.}: int
